@@ -50,6 +50,50 @@ if command_exists "t"; then
 else
     alias t='date +"%I:%M %p // %A, %B %d, %Y"'
 fi
+
+function check_installed_programs()
+{
+    if [ ! -f "~/.req_programs" ];
+    then
+        echo "'~/.req_programs' does not exist; cannot test program" \
+             "installation status."
+        return 1
+    fi
+
+    # Using `IFS` with `read` will allow setting a custom field delimiter to 
+    # read values in a line. For instance, using IFS ':' with string 
+    # 'hello:world' will be read twice, one variable 'hello' the other 'world'.
+    # `IFS` isn't set here, since the file is single words per line.
+
+    # Also, if reading more than one word, it might look something like this:
+    # `IFS=, read -r prog_name prog_path`
+    while read -r req_prog_line; 
+    do
+        prog_path=$(command -v $req_prog_line)
+        prog_len=${#prog_path}
+        
+        echo -n "  - $req_prog_line"
+        # TODO: Find a cleaner way to write this
+        for i in {$prog_len..20}; 
+        do
+            echo -n "."
+        done
+        echo -n " "
+        
+        # Change the color of installed/not installed programs to green/red
+        if [ $prog_path = '' ]; then
+            echo -e "\e[41mNOT INSTALLED\e[49m"
+        else
+            # Get first line to avoid license information from certain commands'
+            # `--version` option
+            prog_version=$($prog_path --version | head -n1)
+            echo -e "\e[42mINSTALLED\e[49m - Version $prog_version" \
+                    "@ '$prog_path'"
+        fi
+    done < ~/.req_programs
+
+    return 0
+}
 ###############################################################################
 # END OF CUSTOM TOOLS
 ###############################################################################
