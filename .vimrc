@@ -33,8 +33,7 @@ nmap <silent> <C-w>h :sp
 
 " Decrese the write-to-disk time and timeout for keybinds
 set updatetime=250
-set timeoutlen=300
-
+set timeoutlen=250
 
 if has("xterm_clipboard")
     const l:clipboardName = has("unnamedplus") ? "unnamedplus" : "unnamed"
@@ -91,6 +90,9 @@ nmap <silent> <C-l> <C-w><C-l> | nmap <silent> <C-right> <C-w><C-l>
 
 " Allow easier escape from terminal mode
 tmap <silent> <Esc><Esc> <C-\\><C-n>
+
+" Implement Home/End to start/end of line, like in Windows (force of habit)
+imap <Home> <Esc>I | imap <End> <Esc>A
 " }}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -102,11 +104,6 @@ nmap <silent> <Leader>ti :set expandtab!<CR>
 """"""""""""""""""""""""""""""""""""""""
 " TODO: CREATE CUSTOM COMMAND TO DO A FULL REPLACE, USING TCL SYNTAX (.C)
 " TAKE WHOLE ARGUMENT. .C<DELIM>VAL.1<DELIM>VAL.2<DELIM><OPTS>
-""""""""""""""""""""""""""""""""""""""""
-
-""""""""""""""""""""""""""""""""""""""""
-" TODO: CREATE A STATUS LINE CONTAINING THE FOLLOWING
-" FILENAME <MODE> [changes made?]                                      line#:col
 """"""""""""""""""""""""""""""""""""""""
 
 """"""""""""""""""""""""""""""""""""""""
@@ -147,36 +144,9 @@ autocmd BufEnter * call s:setFileFormatParams()
 
 """"""""""""""""""""""""""""""""""""""""
 " TODO: Create an autocommand that will comment out the lines of text that are
-"       currently highlighted. 
+"       currently highlighted.
 " nmap gcc => comment out a single line
 " vmap gbc => comment out several lines (normally highlighted in visual mode)
-""""""""""""""""""""""""""""""""""""""""
-
-""""""""""""""""""""""""""""""""""""""""
-" TODO: CREATE AN AUTOCOMPLETE THAT HAPPENS ON KEYPRESS. CAN USE 'TextChangedI'
-" AND <C-N> (OR ADJACENT) TO DISPLAY THE LIST OF AUTOCOMPLETED WORDS.
-" USE <C-j> TO GO DOWN, <C-k> TO GO UP 
-" When typing, a popup box will display with a list of words to autocomplete.
-" Hitting tab should confirm the choice
-" <CTRL-{j/k}> should move down/up through the list
-" hitting <Esc> will cancel the autocompletion
-" If this starts to really bog down the system, then we can set it so that '<Tab>'
-" will summon an autocomplete list
-
-function! s:displayAutocomplete()
-    " When the user
-    " When in insert mode and the popup is open, tab should select the chosen
-    " word    
-endfunction
-
-" I might need to manually draw the window with autocompletion every time the
-" keys are pressed and when the cursor moves.
-" Alternatively, there are some scripts I could reference for inspriation (or
-" outright steal the code from).
-" But, I've done most of my work at Adelphi without autocomplete, so it isn't
-" needed.
-
-autocmd TextChangedI * call s:displayAutocomplete()
 """"""""""""""""""""""""""""""""""""""""
 
 """"""""""""""""""""""""""""""""""""""""
@@ -189,7 +159,8 @@ autocmd TextChangedI * call s:displayAutocomplete()
 " HIGHLIGHTING {{{
 """"""""""""""""""""""""""""""""""""""""
 function! s:highlightYankedText()
-    " set the background to the search/highlight color
+    " set the background to the search/highlight color using the register 
+    " variables for yanked text.
     " set_timer(50, clear highlight here
 endfunction
 
@@ -198,11 +169,6 @@ autocmd TextYankPost * call s:highlightYankedText()
 
 " Highlight search match options, and press "Escape" to cancel
 set hlsearch | nmap <silent> <Esc> :nohlsearch<CR>
-
-""""""""""""""""""""""""""""""""""""""""
-" TODO: ADD CODE TO HIGHLIGHT THE CODE FOLLOWING 'TODO:'; THIS SHOULD ALSO HIGH-
-"       LIGHT EVERY COMMENTED LINE FOLLOWING THE 'TODO:' LINE.
-""""""""""""""""""""""""""""""""""""""""
 " }}}
 
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -223,9 +189,9 @@ if exists("syntax_on")
   syntax reset
 endif
 
-" this can be changed to 'transparant' or something to allow using the 
+" this can be changed to 'transparant' or something to allow using the
 " terminal's background.
-set background=dark
+set background=transparant
 let g:colors_name = "cyberpunk"
 
 function! HighlightFor(group, ...)
@@ -333,6 +299,9 @@ highlight Special gui=NONE
 highlight CursorLine guibg=#1c171f guifg=NONE gui=NONE cterm=NONE
 highlight Cursor gui=none guifg=#2b3e5a guibg=#00ffc8
 highlight IncSearch cterm=reverse guibg=#13b894
+
+" Remove underline from line number where cursor is located.
+highlight CursorLineNr cterm=NONE
 
 " Set all characters in positions > 80 to be highlighted in red; if colorcolumn
 " is not available, this will still be used.
